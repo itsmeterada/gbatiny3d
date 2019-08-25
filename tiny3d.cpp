@@ -1,5 +1,5 @@
 //
-//  line drawing sample for GBA
+//  3D Wireframe drawing sample for GBA
 //	Takehiko Terada (its_me_terada@me.com)
 //	2016/05/05
 //
