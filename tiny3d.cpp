@@ -158,7 +158,7 @@ bool buttons[10];
 #define NUM_POINTS		200
 
 #include "type.h"
-#include "mesh_monkey.h"
+#include "mesh_torus.h"
 
 #define SCREENW   240
 #define SCREENH   160
@@ -555,9 +555,9 @@ int main(void)
       proj_nodes[i][1] = (FOV * p.y) / (FOV + p.z) + HALFH;
     }
 
-    mesh_rotation.x += 3;
-    mesh_rotation.y += 2;
-    mesh_rotation.z += 1;
+    mesh_rotation.x += 10;
+    mesh_rotation.y += 8;
+    mesh_rotation.z += 7;
 
 		if (mesh_rotation.x > 360) mesh_rotation.x = 0;
     if (mesh_rotation.y > 360) mesh_rotation.y = 0;
