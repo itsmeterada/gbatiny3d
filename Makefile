@@ -9,8 +9,9 @@ BINARY = tiny3d.elf
 SRCS = tiny3d.cpp
 OBJS = $(SRCS:.cpp=.o)
 
-CFLAGS = -mthumb -mthumb-interwork
-CFLAGS += -Wall 
+CFLAGS = -Wall
+CFLAGS += -marm -mthumb-interwork
+#CFLAGS += -mthumb -mthumb-interwork
 CFLAGS += -std=c99
 #CFLAGS += -specs=gba_mb.specs
 CFLAGS += -fno-strict-aliasing
@@ -24,9 +25,11 @@ CFLAGS += -O2
 
 #CFLAGS = -Wall -specs=gba_mb.specs
 
-LDFLAGS = -mthumb-interwork
-LDFLAGS += -mthumb
-LDFLAGS += -specs=gba.specs
+LDFLAGS = -specs=gba.specs
+LDFLAGS += -marm -mthumb-interwork
+#LDFLAGS += -mthumb-interwork
+#LDFLAGS += -mthumb
+
 
 ALL: $(PROGS)
 
