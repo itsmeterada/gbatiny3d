@@ -130,6 +130,12 @@ vu16 *scanlineCounter = REG_VCOUNT;
 #define DMA_16			0x00000000
 #define DMA_32			0x04000000
 
+#ifdef DEBUG
+#define CODE_IN_IWRAM
+#else // DEBUG
+#define CODE_IN_IWRAM __attribute__ ((section (".iwram"), long_call))
+#endif // DEBUG
+
 vu16 *vram;
 #define VRAM_ADRS		(vu16 *)0x06000000
 #define RGB(r,g,b) ((((b)>>3)<<10)+(((g)>>3)<<5)+((r)>>3))
@@ -186,7 +192,7 @@ static unsigned char draw_type = 0;          // 0 - vertex | 1 - wireframe | 2 -
 // ----------------------------------------------
 // SIN/COS from 90 degrees LUT
 // ----------------------------------------------
-INT32 SIN(UINT16 angle) {
+INT32 CODE_IN_IWRAM SIN(UINT16 angle) {
   angle += 90;
   if (angle > 450) return LUT(0);
   if (angle > 360 && angle < 451) return -LUT(angle-360);
@@ -195,7 +201,7 @@ INT32 SIN(UINT16 angle) {
   return LUT(180-angle);
 }
 
-INT32 COS(UINT16 angle) {
+INT32 CODE_IN_IWRAM COS(UINT16 angle) {
   if (angle > 360) return LUT(0);
   if (angle > 270 && angle < 361) return  LUT(360-angle);
   if (angle > 180 && angle < 271) return -LUT(angle-180);
@@ -206,7 +212,7 @@ INT32 COS(UINT16 angle) {
 // ----------------------------------------------
 // Matrix operation
 // ----------------------------------------------
-Matrix4 mMultiply(const Matrix4 &mat1, const Matrix4 &mat2)
+Matrix4 CODE_IN_IWRAM mMultiply(const Matrix4 &mat1, const Matrix4 &mat2)
 {
   Matrix4 mat;
   unsigned char r,c;
@@ -219,7 +225,7 @@ Matrix4 mMultiply(const Matrix4 &mat1, const Matrix4 &mat2)
   return mat;
 }
 
-Matrix4 mRotateX(const UINT16 angle)
+Matrix4 CODE_IN_IWRAM mRotateX(const UINT16 angle)
 {
   Matrix4 mat;
   mat.m[1][1] =  COS(angle);
@@ -229,7 +235,7 @@ Matrix4 mRotateX(const UINT16 angle)
   return mat;
 }
 
-Matrix4 mRotateY(const UINT16 angle)
+Matrix4 CODE_IN_IWRAM mRotateY(const UINT16 angle)
 {
   Matrix4 mat;
   mat.m[0][0] =  COS(angle);
@@ -239,7 +245,7 @@ Matrix4 mRotateY(const UINT16 angle)
   return mat;
 }
 
-Matrix4 mRotateZ(const UINT16 angle)
+Matrix4 CODE_IN_IWRAM mRotateZ(const UINT16 angle)
 {
   Matrix4 mat;
   mat.m[0][0] =  COS(angle);
@@ -249,7 +255,7 @@ Matrix4 mRotateZ(const UINT16 angle)
   return mat;
 }
 
-Matrix4 mTranslate(const INT32 x, const INT32 y, const INT32 z)
+Matrix4 CODE_IN_IWRAM mTranslate(const INT32 x, const INT32 y, const INT32 z)
 {
   Matrix4 mat;
   mat.m[3][0] =  x << PSHIFT;
@@ -258,7 +264,7 @@ Matrix4 mTranslate(const INT32 x, const INT32 y, const INT32 z)
   return mat;
 }
 
-Matrix4 mScale(const float ratio)
+Matrix4 CODE_IN_IWRAM mScale(const float ratio)
 {
   Matrix4 mat;
   mat.m[0][0] *= ratio;
@@ -270,7 +276,7 @@ Matrix4 mScale(const float ratio)
 // ----------------------------------------------
 // Shoelace algorithm to get the surface
 // ----------------------------------------------
-int shoelace(const INT16 (*n)[2], const unsigned char index)
+int CODE_IN_IWRAM shoelace(const INT16 (*n)[2], const unsigned char index)
 {
   unsigned char t = 0;
   INT16 surface = 0;
@@ -285,7 +291,7 @@ int shoelace(const INT16 (*n)[2], const unsigned char index)
 // ----------------------------------------------
 // Shoelace algorithm for triangle visibility
 // ----------------------------------------------
-bool is_hidden(const INT16 (*n)[2], const unsigned char index)
+bool CODE_IN_IWRAM is_hidden(const INT16 (*n)[2], const unsigned char index)
 {
   // (x1y2 - y1x2) + (x2y3 - y2x3) ...
   return ( ( (n[EDGE(index,0)][0] * n[EDGE(index,1)][1]) -
@@ -299,7 +305,7 @@ bool is_hidden(const INT16 (*n)[2], const unsigned char index)
 // ----------------------------------------------
 // draw projected nodes
 // ----------------------------------------------
-void draw_vertex(const INT16 (*n)[2], const UINT16 color)
+void CODE_IN_IWRAM draw_vertex(const INT16 (*n)[2], const UINT16 color)
 {
   i = NODECOUNT-1;
   do {
@@ -310,7 +316,7 @@ void draw_vertex(const INT16 (*n)[2], const UINT16 color)
 // ----------------------------------------------
 // draw edges between projected nodes
 // ----------------------------------------------
-void draw_wireframe(const INT16 (*n)[2], const UINT16 color)
+void CODE_IN_IWRAM draw_wireframe(const INT16 (*n)[2], const UINT16 color)
 {
   i = TRICOUNT-1;
   do {
@@ -329,12 +335,12 @@ void draw_wireframe(const INT16 (*n)[2], const UINT16 color)
 // -- Start --
 unsigned int _num = 0;
 
-void xorshiftSeed(unsigned int seed)
+void CODE_IN_IWRAM xorshiftSeed(unsigned int seed)
 {
 	_num = seed;
 }
 
-unsigned int xorshift32()
+unsigned int CODE_IN_IWRAM xorshift32()
 {
 	_num = _num ^ (_num << 13);
 	_num = _num ^ (_num >> 17);
@@ -344,12 +350,12 @@ unsigned int xorshift32()
 // -- End --
 
 // Not working ?
-void waitForVSync()
+void CODE_IN_IWRAM waitForVSync()
 {
 	while((*REG_DISPSTAT & 1));
 }
 
-void waitForVBlank()
+void CODE_IN_IWRAM waitForVBlank()
 {
 #if 1
 	while(!(*scanlineCounter));
@@ -367,14 +373,14 @@ void waitForVBlank()
 }
 
 
-void *mallocAligned(u32 size, int align)
+void CODE_IN_IWRAM *mallocAligned(u32 size, int align)
 {
 	void *p = malloc(size + align);
 	if ((u32)p % align) p += ((u32)p % align);
 	return p;
 }
 
-void
+void CODE_IN_IWRAM
 drawLineEFLA(int x1, int y1, int x2, int y2, unsigned short color)
 {
     bool yLonger = false;
@@ -432,14 +438,14 @@ drawLineEFLA(int x1, int y1, int x2, int y2, unsigned short color)
 }
 
 
-void DMAFastCopy(void *source, void *dest, u32 count, u32 mode)
+void CODE_IN_IWRAM DMAFastCopy(void *source, void *dest, u32 count, u32 mode)
 {
 	REG_DMA3SAD = (u32)source;
 	REG_DMA3DAD = (u32)dest;
 	REG_DMA3CNT = count | mode;
 }
 
-void checkButtons()
+void CODE_IN_IWRAM checkButtons()
 {
 	buttons[0] = !((*BUTTONS) & BUTTON_A);
 	buttons[1] = !((*BUTTONS) & BUTTON_B);
