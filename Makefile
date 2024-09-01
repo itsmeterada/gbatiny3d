@@ -1,7 +1,10 @@
 
-CC = arm-none-eabi-gcc
-CXX = arm-none-eabi-g++
-OBJCOPY = arm-none-eabi-objcopy
+DEVKITARM=/opt/devkitPro/devkitARM
+DEVKITPRO=/opt/devkitPro
+
+CC = $(DEVKITARM)/bin/arm-none-eabi-gcc
+CXX = $(DEVKITARM)/bin/arm-none-eabi-g++
+OBJCOPY = $(DEVKITARM)/bin/arm-none-eabi-objcopy
 
 
 PROGS = tiny3d.gba
@@ -20,12 +23,13 @@ CFLAGS += -mtune=arm7tdmi
 CFLAGS += -fomit-frame-pointer
 CFLAGS += -ffast-math
 CFLAGS += -fpermissive
-CFLAGS += -O2
+CFLAGS += -O0 -g 
+#CFLAGS += -O2
 #CFLAGS += -MMD -MP -MF tiny3d.d 
 
 #CFLAGS = -Wall -specs=gba_mb.specs
 
-LDFLAGS = -specs=gba.specs
+LDFLAGS = -L$(DEVKITARM)/arm-none-eabi/lib -specs=gba.specs
 LDFLAGS += -marm -mthumb-interwork
 #LDFLAGS += -mthumb-interwork
 #LDFLAGS += -mthumb
